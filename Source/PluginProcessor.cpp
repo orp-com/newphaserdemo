@@ -166,7 +166,8 @@ bool NewphaserdemoAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* NewphaserdemoAudioProcessor::createEditor()
 {
-    return new NewphaserdemoAudioProcessorEditor (*this);
+    //return new NewphaserdemoAudioProcessorEditor (*this);
+    return new juce::GenericAudioProcessorEditor(*this);
 }
 
 //==============================================================================
@@ -181,6 +182,32 @@ void NewphaserdemoAudioProcessor::setStateInformation (const void* data, int siz
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+}
+
+juce::AudioProcessorValueTreeState::ParameterLayout NewphaserdemoAudioProcessor::createParameterLayout()
+{
+    juce::AudioProcessorValueTreeState::ParameterLayout layout;
+    
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"Rate", 1},
+                                                           "Rate",
+                                                           juce::NormalisableRange<float>(0.1f, 10.f, 0.01f, 1.0f),
+                                                           1.0f)); // Default: 1 Hz
+
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"Depth", 1},
+                                                           "Depth",
+                                                           juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+                                                           0.5f));
+
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"Feedback", 1},
+                                                           "Feedback",
+                                                           juce::NormalisableRange<float>(-1.0f, 1.0f, 0.01f),
+                                                           0.0f));
+
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"Mix", 1},
+                                                           "Mix",
+                                                           juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+                                                           0.5f));
+    return layout;
 }
 
 //==============================================================================
