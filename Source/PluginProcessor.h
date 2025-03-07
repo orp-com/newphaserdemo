@@ -56,6 +56,17 @@ public:
     juce::AudioProcessorValueTreeState apvts{*this, nullptr, "Parameters", createParameterLayout()};
 
 private:
+private:
+    float rate = 0.5f;
+    float depth = 500.0f;
+
+    using AllPassFilter = juce::dsp::StateVariableTPTFilter<float>;
+    using AllPassFilterChain = juce::dsp::ProcessorChain<AllPassFilter, AllPassFilter, AllPassFilter, AllPassFilter>;
+    using LFO = juce::dsp::Oscillator<float>;
+    using MonoChain = juce::dsp::ProcessorChain<AllPassFilterChain, LFO, juce::dsp::Gain<float>>;
+
+    MonoChain leftChain, rightChain;
+
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NewphaserdemoAudioProcessor)
 };
