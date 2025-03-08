@@ -95,6 +95,26 @@ void NewphaserdemoAudioProcessor::prepareToPlay (double sampleRate, int samplesP
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
+    juce::dsp::ProcessSpec spec;
+    spec.sampleRate = sampleRate;
+    spec.maximumBlockSize = samplesPerBlock;
+    spec.numChannels = 1;
+
+    leftChain.prepare(spec);
+    rightChain.prepare(spec);
+    
+    
+    // ✅ Properly initialize the LFO
+    auto& leftLFO = leftChain.get<1>(); // Get LFO from the chain
+    auto& rightLFO = rightChain.get<1>();
+
+    // ✅ Ensure the LFO has a valid waveform
+    leftLFO.initialise([](float x) { return std::sin(x); }, 128);
+    rightLFO.initialise([](float x) { return std::sin(x); }, 128);
+
+    // ✅ Set a default frequency to avoid 0 Hz assertion
+    leftLFO.setFrequency(1.0f);
+    rightLFO.setFrequency(1.0f);
 }
 
 void NewphaserdemoAudioProcessor::releaseResources()
@@ -156,6 +176,25 @@ void NewphaserdemoAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
 
         // ..do something to the data...
     }
+    
+    juce::dsp::AudioBlock<float> block(buffer);
+    
+    auto leftBlock = block.getSingleChannelBlock(0);
+    auto rightBlock = block.getSingleChannelBlock(1);
+    
+    auto& leftFilters = leftChain.get<0>();
+    auto& rightFilters = rightChain.get<0>();
+
+    auto& leftLFO = leftChain.get<1>();
+    auto& rightLFO = rightChain.get<1>();
+    
+    juce::dsp::ProcessContextReplacing<float> leftContext(leftBlock);
+    juce::dsp::ProcessContextReplacing<float> rightContext(rightBlock);
+
+    leftChain.process(leftContext);
+    rightChain.process(rightContext);
+    
+    
 }
 
 //==============================================================================

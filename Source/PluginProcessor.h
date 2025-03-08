@@ -57,8 +57,6 @@ public:
 
 private:
 private:
-    float rate = 0.5f;
-    float depth = 500.0f;
 
     using AllPassFilter = juce::dsp::StateVariableTPTFilter<float>;
     using AllPassFilterChain = juce::dsp::ProcessorChain<AllPassFilter, AllPassFilter, AllPassFilter, AllPassFilter>;
