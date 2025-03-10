@@ -10,6 +10,18 @@
 
 #include <JuceHeader.h>
 
+
+struct ChainSettings
+{
+    float rate{1.0f};
+    float depth{0.5f};
+    float feedback{0.0f};
+    float frequency{1000.0f};
+    float mix{0.5f};
+};
+
+ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts);
+
 //==============================================================================
 /**
 */

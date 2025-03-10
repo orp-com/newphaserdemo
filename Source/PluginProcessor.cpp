@@ -225,6 +225,19 @@ void NewphaserdemoAudioProcessor::setStateInformation (const void* data, int siz
     // whose contents will have been created by the getStateInformation() call.
 }
 
+ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
+{
+    ChainSettings settings;
+    
+    settings.rate = apvts.getRawParameterValue("Rate")->load();
+    settings.depth = apvts.getRawParameterValue("Depth")->load();
+    settings.feedback = apvts.getRawParameterValue("Feedback")->load();
+    settings.frequency = apvts.getRawParameterValue("Frequency")->load();
+    settings.mix = apvts.getRawParameterValue("Mix")->load();
+    
+    return settings;
+}
+
 juce::AudioProcessorValueTreeState::ParameterLayout NewphaserdemoAudioProcessor::createParameterLayout()
 {
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
