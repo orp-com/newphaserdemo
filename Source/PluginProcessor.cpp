@@ -115,6 +115,8 @@ void NewphaserdemoAudioProcessor::prepareToPlay (double sampleRate, int samplesP
     // ✅ Set a default frequency to avoid 0 Hz assertion
     leftLFO.setFrequency(1.0f);
     rightLFO.setFrequency(1.0f);
+    
+    //keeping this here to as a temp fix to avoid assertation failure (lines 107-117)
 }
 
 void NewphaserdemoAudioProcessor::releaseResources()
@@ -241,6 +243,11 @@ juce::AudioProcessorValueTreeState::ParameterLayout NewphaserdemoAudioProcessor:
                                                            "Feedback",
                                                            juce::NormalisableRange<float>(-1.0f, 1.0f, 0.01f),
                                                            0.0f));
+    
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"Frequency", 1},
+                                                           "Frequency",
+                                                           juce::NormalisableRange<float>(100.0f, 8000.0f, 1.0f, 0.5f),
+                                                           1000.0f));
 
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"Mix", 1},
                                                            "Mix",
