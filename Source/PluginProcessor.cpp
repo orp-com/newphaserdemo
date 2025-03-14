@@ -103,20 +103,29 @@ void NewphaserdemoAudioProcessor::prepareToPlay (double sampleRate, int samplesP
     leftChain.prepare(spec);
     rightChain.prepare(spec);
     
+    auto chainSettings = getChainSettings(apvts);
     
-    // ✅ Properly initialize the LFO
-    auto& leftLFO = leftChain.get<1>(); // Get LFO from the chain
+    auto& leftLFO = leftChain.get<1>();
     auto& rightLFO = rightChain.get<1>();
 
-    // ✅ Ensure the LFO has a valid waveform
     leftLFO.initialise([](float x) { return std::sin(x); }, 128);
     rightLFO.initialise([](float x) { return std::sin(x); }, 128);
-
-    // ✅ Set a default frequency to avoid 0 Hz assertion
+    
     leftLFO.setFrequency(1.0f);
     rightLFO.setFrequency(1.0f);
     
-    //keeping this here to as a temp fix to avoid assertation failure (lines 107-117)
+    auto& leftFilters = leftChain.get<0>();
+    auto& rightFilters = rightChain.get<0>();
+    
+    for(int i= 0 ; i < 4; ++i)
+    {
+        leftFilters.get<i>().setType(juce::dsp::StateVariableTPTFilterType::highpass);
+        rightFilters.get<i>().setType(juce::dsp::StateVariableTPTFilterType::highpass);
+        
+        leftFilters.get<i>().setCutoffFrequency(chainSettings.centerFrequency);
+        rightFilters.get<i>().setCutoffFrequency(chainSettings.centerFrequency);
+        
+    }
 }
 
 void NewphaserdemoAudioProcessor::releaseResources()
