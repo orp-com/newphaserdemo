@@ -13,6 +13,8 @@
 
 struct ChainSettings
 {
+    int bands{1};
+    int stages{4};
     float rate{1.0f};
     float depth{0.5f};
     float feedback{0.0f};
@@ -66,6 +68,7 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
     juce::AudioProcessorValueTreeState apvts{*this, nullptr, "Parameters", createParameterLayout()};
+    void setNumStages(int numStages, int numBands);
 
 private:
     using AllPassFilter = juce::dsp::StateVariableTPTFilter<float>;

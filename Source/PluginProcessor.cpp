@@ -105,8 +105,7 @@ void NewphaserdemoAudioProcessor::prepareToPlay (double sampleRate, int samplesP
     
     auto chainSettings = getChainSettings(apvts);
     
-    auto& leftLFO = leftChain.get<1>();
-    auto& rightLFO = rightChain.get<1>();
+
 
     leftLFO.initialise([](float x) { return std::sin(x); }, 128);
     rightLFO.initialise([](float x) { return std::sin(x); }, 128);
@@ -114,18 +113,7 @@ void NewphaserdemoAudioProcessor::prepareToPlay (double sampleRate, int samplesP
     leftLFO.setFrequency(1.0f);
     rightLFO.setFrequency(1.0f);
     
-    auto& leftFilters = leftChain.get<0>();
-    auto& rightFilters = rightChain.get<0>();
-    
-    for(int i= 0 ; i < 4; ++i)
-    {
-        leftFilters.get<i>().setType(juce::dsp::StateVariableTPTFilterType::highpass);
-        rightFilters.get<i>().setType(juce::dsp::StateVariableTPTFilterType::highpass);
-        
-        leftFilters.get<i>().setCutoffFrequency(chainSettings.centerFrequency);
-        rightFilters.get<i>().setCutoffFrequency(chainSettings.centerFrequency);
-        
-    }
+
 }
 
 void NewphaserdemoAudioProcessor::releaseResources()
@@ -193,17 +181,12 @@ void NewphaserdemoAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
     auto leftBlock = block.getSingleChannelBlock(0);
     auto rightBlock = block.getSingleChannelBlock(1);
     
-    auto& leftFilters = leftChain.get<0>();
-    auto& rightFilters = rightChain.get<0>();
 
-    auto& leftLFO = leftChain.get<1>();
-    auto& rightLFO = rightChain.get<1>();
     
     juce::dsp::ProcessContextReplacing<float> leftContext(leftBlock);
     juce::dsp::ProcessContextReplacing<float> rightContext(rightBlock);
 
-    leftChain.process(leftContext);
-    rightChain.process(rightContext);
+ 
     
     
 }
@@ -234,6 +217,26 @@ void NewphaserdemoAudioProcessor::setStateInformation (const void* data, int siz
     // whose contents will have been created by the getStateInformation() call.
 }
 
+void NewphaserdemoAudioProcessor::setNumStages(int numStages, int numBands)
+{
+    auto& lFilters = leftFilters;
+    auto& rFilters = rightFilters;
+    
+    int totalFilters = numStages *numBands *2;
+    
+    lFilters.resize(totalFilters);
+    rFilters.resize(totalFilters);
+    
+    for (auto& filter : lFilters)
+    {
+        filter.setType(juce::dsp::StateVariableTPTFilterType::highpass);
+    }
+    for (auto& filter : rFilters)
+    {
+        filter.setType(juce::dsp::StateVariableTPTFilterType::highpass);
+    }
+}
+
 ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
 {
     ChainSettings settings;
@@ -243,6 +246,9 @@ ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
     settings.feedback = apvts.getRawParameterValue("Feedback")->load();
     settings.frequency = apvts.getRawParameterValue("Frequency")->load();
     settings.mix = apvts.getRawParameterValue("Mix")->load();
+    settings.stages = static_cast<int>(apvts.getRawParameterValue("Stages")->load());
+    settings.stages = static_cast<int>(apvts.getRawParameterValue("Bands")->load());
+
     
     return settings;
 }
@@ -275,6 +281,12 @@ juce::AudioProcessorValueTreeState::ParameterLayout NewphaserdemoAudioProcessor:
                                                            "Mix",
                                                            juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
                                                            0.5f));
+    layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID{"Stages", 1},
+                                                         "Stages",
+                                                         1, 12, 4));
+    layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID{"Bands", 1},
+                                                         "Bands",
+                                                         1, 3, 1));
     return layout;
 }
 
